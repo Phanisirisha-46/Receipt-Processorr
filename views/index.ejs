@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Processing</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: auto;
+            background: linear-gradient( #838cb7, #dfcaf3);
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.5);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #764ba2;
+            transform: scale(1.05);
+        }
+
+        .items-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .item-list {
+            list-style: none;
+            margin-top: 10px;
+            padding: 0;
+        }
+
+        .item-list li {
+            background: #f4f4f4;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 8px;
+            width: 100%;
+            text-align: left;
+            transition: 0.3s;
+        }
+
+        .item-list li:hover {
+            background: #ddd;
+            transform: scale(1.02);
+        }
+
+        #receiptIdResult, #pointsResult {
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Receipt Processing System</h1>
+
+        <form onsubmit="event.preventDefault(); processReceipt();">
+            <input type="text" id="retailer" placeholder="Retailer Name" required>
+            <input type="date" id="purchaseDate" required>
+            <input type="time" id="purchaseTime" required>
+            <input type="number" id="total" placeholder="Total Amount" required>
+
+            <h3>Items</h3>
+            <input type="text" id="itemName" placeholder="Item Name">
+            <input type="number" id="itemPrice" placeholder="Item Price">
+            <button type="button" class="btn" onclick="addItem()">Add Item</button>
+
+            <ul id="itemsList" class="item-list"></ul>
+
+            <button type="submit" class="btn">Process Receipt</button>
+        </form>
+
+        <h2 id="receiptIdResult"></h2>
+
+        <input type="text" id="receiptId" placeholder="Enter Receipt ID">
+        <button onclick="getPoints()" class="btn">Get Points</button>
+
+        <h2 id="pointsResult"></h2>
+    </div>
+
+    <script>
+        let items = [];
+
+        function addItem() {
+            const name = document.getElementById("itemName").value;
+            const price = document.getElementById("itemPrice").value;
+        
+            if (name && price) {
+                items.push({ shortDescription: name, price: parseFloat(price) });
+                document.getElementById("itemsList").innerHTML += `<li>${name} - $${price}</li>`;
+                document.getElementById("itemName").value = "";
+                document.getElementById("itemPrice").value = "";
+            } else {
+                alert("Please enter both item name and price.");
+            }
+        }
+
+        function processReceipt() {
+            const receiptData = {
+                retailer: document.getElementById("retailer").value,
+                purchaseDate: document.getElementById("purchaseDate").value,
+                purchaseTime: document.getElementById("purchaseTime").value,
+                items: items,
+                total: document.getElementById("total").value
+            };
+
+            fetch("/receipts/process", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(receiptData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    document.getElementById("receiptIdResult").innerText = "Receipt ID: " + data.id;
+                    document.getElementById("receiptId").value = data.id; // Auto-fill the ID input
+                } else {
+                    alert("Error: " + data.error);
+                }
+            })
+            .catch(error => console.error("Error processing receipt:", error));
+        }
+
+        function getPoints() {
+            const receiptId = document.getElementById("receiptId").value;
+            if (!receiptId) {
+                alert("Please enter a Receipt ID.");
+                return;
+            }
+            fetch(`/receipts/${receiptId}/points`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById("pointsResult").innerText = data.error;
+                    } else {
+                        document.getElementById("pointsResult").innerText = "Points: " + data.points;
+                    }
+                })
+                .catch(error => console.error("Error fetching points:", error));
+        }
+    </script>
+</body>
+</html>
