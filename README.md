@@ -41,4 +41,4 @@ The Receipt Processing System is designed to efficiently manage and process rece
 
 ### Clone the repository:
 ```sh
-git clone https://github.com/your-repo/receipt-processing-system.git
+git clone https://github.com/Phanisirisha-46/Receipt-Processor.git
