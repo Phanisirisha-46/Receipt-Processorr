@@ -97,7 +97,7 @@ cd Receipt-Processor
 3. Select **GET** method.
 4. Enter the URL:
    ```
-   https://receipt-processorr.onrender.com/receipts/65cf1f3e2a9b7c0012345678/points
+   https://receipt-processorr.onrender.com/receipts/67ade1474fd81787633862e6/points
    ```
 5. Click **Send**.
 
