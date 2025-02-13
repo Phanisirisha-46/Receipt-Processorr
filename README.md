@@ -103,5 +103,5 @@ cd Receipt-Processor
 
 - **Response Example:**
   ```json
-  { "receiptId": "67ade1474fd81787633862e6", "points": 78 }
+  { "receiptId": "67ade1474fd81787633862e6", "points": 91 }
   ```
